@@ -1,12 +1,17 @@
 package com.oviva.spicegen.example;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.authzed.api.v1.PermissionsServiceGrpc;
 import com.authzed.api.v1.SchemaServiceGrpc;
 import com.authzed.api.v1.WriteSchemaRequest;
 import com.authzed.grpcutil.BearerToken;
-import com.oviva.spicegen.api.*;
+import com.oviva.spicegen.api.Consistency;
+import com.oviva.spicegen.api.PermissionService;
+import com.oviva.spicegen.api.SubjectRef;
+import com.oviva.spicegen.api.UpdateRelationships;
 import com.oviva.spicegen.permissions.refs.DocumentRef;
 import com.oviva.spicegen.permissions.refs.FolderRef;
 import com.oviva.spicegen.permissions.refs.TeamRef;
@@ -16,6 +21,10 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -109,10 +118,18 @@ class ExampleTest {
             document.checkRead(
                 SubjectRef.ofObject(user), Consistency.atLeastAsFreshAs(consistencyToken))));
 
-    assertTrue(
-        permissionService.checkPermission(
-            document.checkRead(
-                SubjectRef.ofObject(user2), Consistency.atLeastAsFreshAs(consistencyToken))));
+    Iterator<UserRef> usersAllowedToRead =
+        permissionService.lookupSubjects(document.lookupReadUser());
+    assertTrue(usersAllowedToRead.hasNext());
+    // usersAllowedToRead contains both userId and user2
+    var userIds =
+        StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(usersAllowedToRead, Spliterator.ORDERED), false)
+            .map(UserRef::id)
+            .toList();
+    assertEquals(2, userIds.size());
+    assertTrue(userIds.contains(user.id()));
+    assertTrue(userIds.contains(user2.id()));
   }
 
   private String loadSchema() {

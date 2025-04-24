@@ -1,5 +1,7 @@
 package com.oviva.spicegen.api;
 
+import java.util.Iterator;
+
 public interface PermissionService {
 
   /**
@@ -20,4 +22,6 @@ public interface PermissionService {
    * @return true it the subject is permitted, false otherwise
    */
   boolean checkPermission(CheckPermission checkPermission);
+
+  <T extends ObjectRef> Iterator<T> lookupSubjects(LookupSuspects<T> lookupSuspects);
 }
