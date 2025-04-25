@@ -136,6 +136,13 @@ class ExampleTest {
         permissionService.lookupSubjects(folder.lookupSubjectsReadTeamMember());
     assertTrue(teamsAllowedToRead.hasNext());
     assertEquals(team.id(), teamsAllowedToRead.next().id());
+
+    // Example: find documents a user is allowed to read
+    Iterator<DocumentRef> documentsAllowedToRead =
+        permissionService.lookupResources(
+            DocumentRef.lookupResourcesReadUser(SubjectRef.ofObject(user)));
+    assertTrue(documentsAllowedToRead.hasNext());
+    assertEquals(document.id(), documentsAllowedToRead.next().id());
   }
 
   private String loadSchema() {

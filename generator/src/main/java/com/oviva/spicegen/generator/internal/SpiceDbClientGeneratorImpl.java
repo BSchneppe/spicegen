@@ -4,6 +4,7 @@ import static com.oviva.spicegen.generator.utils.TextUtils.toPascalCase;
 
 import com.oviva.spicegen.api.CheckPermission;
 import com.oviva.spicegen.api.Consistency;
+import com.oviva.spicegen.api.LookupResources;
 import com.oviva.spicegen.api.LookupSuspects;
 import com.oviva.spicegen.api.ObjectRef;
 import com.oviva.spicegen.api.ObjectRefFactory;
@@ -318,6 +319,31 @@ public class SpiceDbClientGeneratorImpl implements SpiceDbClientGenerator {
                     permission.name(),
                     className.simpleName().toUpperCase(),
                     allowedObjectType.relationship())
+                .build());
+
+        var lookupResourcesMethodName =
+            "lookupResources%s%s%s"
+                .formatted(permissionName, refType, toPascalCase(relationshipName));
+        var resourceObjectRefClass =
+            ClassName.bestGuess(
+                TextUtils.capitalize(TextUtils.toCamelCase(definition.name())) + "Ref");
+        var subjectParamName = "subject";
+
+        typeRefBuilder.addMethod(
+            MethodSpec.methodBuilder(lookupResourcesMethodName)
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .addParameter(ClassName.get(SubjectRef.class), subjectParamName)
+                .returns(
+                    ParameterizedTypeName.get(
+                        ClassName.get(LookupResources.class), resourceObjectRefClass))
+                .addCode(
+                    """
+                  return LookupResources.<$T>newBuilder().resourceType(ObjectRefFactories.$L).subject($L).permission($S).build();
+                """,
+                    resourceObjectRefClass,
+                    resourceObjectRefClass.simpleName().toUpperCase(),
+                    subjectParamName,
+                    permission.name())
                 .build());
       }
     }
