@@ -119,7 +119,7 @@ class ExampleTest {
                 SubjectRef.ofObject(user), Consistency.atLeastAsFreshAs(consistencyToken))));
 
     Iterator<UserRef> usersAllowedToRead =
-        permissionService.lookupSubjects(document.lookupReadUser());
+        permissionService.lookupSubjects(document.lookupSubjectsReadUser());
     assertTrue(usersAllowedToRead.hasNext());
     // usersAllowedToRead contains both userId and user2
     var userIds =
@@ -133,7 +133,7 @@ class ExampleTest {
 
     // Example: find teams allowed to read the folder
     Iterator<TeamRef> teamsAllowedToRead =
-        permissionService.lookupSubjects(folder.lookupReadTeamMember());
+        permissionService.lookupSubjects(folder.lookupSubjectsReadTeamMember());
     assertTrue(teamsAllowedToRead.hasNext());
     assertEquals(team.id(), teamsAllowedToRead.next().id());
   }
