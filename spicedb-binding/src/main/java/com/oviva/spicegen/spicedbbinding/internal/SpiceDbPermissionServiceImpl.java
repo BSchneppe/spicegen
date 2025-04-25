@@ -95,4 +95,29 @@ public class SpiceDbPermissionServiceImpl implements PermissionService {
       throw exceptionMapper.map(e);
     }
   }
+
+  @Override
+  public <T extends ObjectRef> Iterator<T> lookupResources(LookupResources<T> lookupResources) {
+
+    var requestBuilder =
+        LookupResourcesRequest.newBuilder()
+            .setPermission(lookupResources.permission())
+            .setResourceObjectType(lookupResources.resourceType().kind())
+            .setSubject(subjectReferenceMapper.map(lookupResources.subject()));
+    var request = requestBuilder.build();
+
+    try {
+      var response = permissionsService.lookupResources(request);
+      return StreamSupport.stream(
+              Spliterators.spliteratorUnknownSize(response, Spliterator.ORDERED), false)
+          .map(
+              lookupSubjectsResponse ->
+                  lookupResources
+                      .resourceType()
+                      .create(lookupSubjectsResponse.getResourceObjectId()))
+          .iterator();
+    } catch (StatusRuntimeException e) {
+      throw exceptionMapper.map(e);
+    }
+  }
 }

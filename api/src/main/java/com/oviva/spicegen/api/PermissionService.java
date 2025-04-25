@@ -42,4 +42,22 @@ public interface PermissionService {
    *     the given resource
    */
   <T extends ObjectRef> Iterator<T> lookupSubjects(LookupSuspects<T> lookupSuspects);
+
+  /**
+   * Finds all resources this subject has the given permission on. This method allows querying the
+   * authorization system for all resources that a specific subject has access to with a specific
+   * permission. The results are returned as an iterator to support handling large result sets
+   * efficiently.
+   *
+   * <p>For example, this can be used to:
+   *
+   * <ul>
+   *   <li>Find all documents a user can read
+   *   <li>Find all folders a team has admin access to
+   * </ul>
+   *
+   * @param lookupResources the request containing subject, permission and resource type details
+   * @return an iterator over the resources the subject has the given permission on
+   */
+  <T extends ObjectRef> Iterator<T> lookupResources(LookupResources<T> lookupResources);
 }
